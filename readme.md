@@ -67,7 +67,11 @@ The optional environment variables assigned during builds exist:
 MEILI_BUILD_ADD_DELAYS=1
   This inserts delays where it makes sense to verify tasks execute.
   At the moment it is used to verify winapi::um::wincon::FreeConsole works as expected.
-  
+
 ```
 
 
+# License
+
+The code in this repository is under the GPLv2 license, see `LICENSE.txt` for details.
+The auto-upgrade clause has been removed because your legal rights shouldn't have that sort of volatility.
