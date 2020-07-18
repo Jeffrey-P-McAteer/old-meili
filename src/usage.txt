@@ -1,0 +1,21 @@
+Meili Usage:
+   meili [options]
+
+where options may be any combination of:
+  
+  --about
+    print information about your system, such as the location of your config file and exit.
+
+  --help
+    print this text and exit.
+
+  --app-dir [directory_name]
+    overrides the app directory used to lookup configuration data. If nothing
+    is specified for directory_name we use "." as the app directory.
+
+  --gui
+    explicitly set the action to open a GUI. This is the default operation when
+    not in interactive mode.
+
+If no action is specified Meili attaches to the system tray and presents a menu for opening GUIs.
+

@@ -1,0 +1,9 @@
+
+# This may be used to overwrite your hostname for friendly identification
+# reasons. The hostname is never used as a crypto identity and
+# should not be used except to identify between 2 strangers.
+# When the value has a length < 4 we replace it with the system hostname.
+hostname = ""
+
+
+
