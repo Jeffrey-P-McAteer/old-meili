@@ -30,9 +30,9 @@ def main(argv):
   if "azure-angel" in str(platform.node()):
     print("Detected azure-angel, moving app builds for testing on other hosts...")
     subprocess.run(['sh', '-c',
-      'cp target/x86_64-unknown-linux-gnu/release/meili /j/public/maili_linux ;'+
-      'cp target/x86_64-pc-windows-gnu/release/meili.exe /j/public/maili_win.exe ;'+
-      'cp target/x86_64-apple-darwin/release/meili /j/public/maili_macos'
+      'cp target/x86_64-unknown-linux-gnu/release/meili /j/public/meili_linux ;'+
+      'cp target/x86_64-pc-windows-gnu/release/meili.exe /j/public/meili_win.exe ;'+
+      'cp target/x86_64-apple-darwin/release/meili /j/public/meili_macos'
     ]).check_returncode()
 
 if __name__ == '__main__':
