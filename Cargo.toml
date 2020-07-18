@@ -3,7 +3,7 @@ name = "meili"
 version = "0.1.0"
 authors = ["Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"]
 edition = "2018"
-
+build = "build.rs"
 
 [dependencies]
 
@@ -25,4 +25,12 @@ sysbar = { git = "https://github.com/rust-sysbar/rust-sysbar.git", branch = "mas
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
+
+[build-dependencies]
+winres = "0.1"
+
+[package.metadata.winres]
+OriginalFilename = "meili.exe"
+LegalCopyright = "Copyright © 2020 Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"
+
 

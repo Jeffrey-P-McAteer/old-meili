@@ -57,6 +57,12 @@ pub fn open_gui(args: &Vec<String>, config: &Config) {
 
 #[cfg(target_os = "macos")]
 pub fn open_gui(args: &Vec<String>, config: &Config) {
+  if ! args.contains(&"--gui".to_string()) {
+    // This attempts to hide the Terminal.app window which macos
+    // attaches to us by default.
+    
+  }
+
   let mut bar = sysbar::Sysbar::new("meili");
   
   let hostname_s = format!("h: {}", config.hostname);
