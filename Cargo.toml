@@ -13,14 +13,8 @@ hostname = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
 
-# no macos support on the official release, so we split deps and implment
-# the system tray 2 ways:
 
-[target.'cfg(not(target_os = "macos"))'.dependencies]
-systray = "0.4"
-
-[target.'cfg(target_os = "macos")'.dependencies]
-sysbar = { git = "https://github.com/rust-sysbar/rust-sysbar.git", branch = "master" }
+systray = { git = "https://github.com/Jeffrey-P-McAteer/systray-rs.git", branch = "master" }
 
 
 [target.'cfg(windows)'.dependencies]

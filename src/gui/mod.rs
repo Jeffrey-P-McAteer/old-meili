@@ -8,6 +8,11 @@
  * among other OS-specific requirements for graphics.
  */
 
+const ICON_PNG: &'static [u8] = include_bytes!("../../res/icon.png");
+const ICON_ICO: &'static [u8] = include_bytes!("../../res/icon.ico");
+//const icon_: &'static [u8; N] icon_png = include_bytes!("../res/icon.png");
+
+
 #[cfg(target_os = "macos")]
 mod osx;
 

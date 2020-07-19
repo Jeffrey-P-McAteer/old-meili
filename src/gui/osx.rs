@@ -1,5 +1,6 @@
 
-use sysbar;
+use systray;
+
 
 use crate::config::Config;
 
@@ -10,21 +11,24 @@ pub fn open_gui(args: &Vec<String>, config: &Config) {
     
   }
 
-  let mut bar = sysbar::Sysbar::new("meili");
+  let mut app = systray::Application::new().expect("Cannot create graphics");
   
+  // TODO embed + extract + assign icon file
+  //app.set_icon_from_file("/usr/share/gxkb/flags/ua.png").unwrap();
+
   let hostname_s = format!("h: {}", config.hostname);
-  bar.add_item(
-    &hostname_s,
-    Box::new(move || {
-        
-        // TODO real menu items
-        println!("Printing a thing!");
+  app.add_menu_item(&hostname_s, |_| {
+      
+      // TODO real menu items
+      println!("Printing a thing!");
 
-    }),
-  );
+      Ok::<_, systray::Error>(())
+  }).unwrap();
 
-  bar.add_quit_item("Quit");
+  app.add_menu_item("quit", |_| -> Result<(), systray::Error> {
+      std::process::exit(0)
+  }).unwrap();
 
-  bar.display();
-
+  app.wait_for_message().unwrap();
 }
+
