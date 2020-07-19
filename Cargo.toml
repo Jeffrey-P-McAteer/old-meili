@@ -5,6 +5,10 @@ authors = ["Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"]
 edition = "2018"
 build = "build.rs"
 
+[package.metadata.winres]
+OriginalFilename = "meili.exe"
+LegalCopyright = "Copyright © 2020 Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"
+
 [dependencies]
 
 app_dirs = "1.2"
@@ -13,18 +17,30 @@ hostname = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
 
-
-systray = { git = "https://github.com/Jeffrey-P-McAteer/systray-rs.git", branch = "master" }
-
-
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winuser"] }
+
 
 [build-dependencies]
 winres = "0.1"
 
-[package.metadata.winres]
-OriginalFilename = "meili.exe"
-LegalCopyright = "Copyright © 2020 Jeffrey McAteer <jeffrey.p.mcateer@gmail.com>"
+
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi= { version = "0.3.8", features = ["shellapi", "libloaderapi", "errhandlingapi", "impl-default"] }
+libc= "0.2.66"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk= "0.8.1"
+glib= "0.9.3"
+libappindicator= "0.5.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.20"
+objc = "0.2"
+core-graphics = "0.19.0"
+objc-foundation = "0.1"
+objc_id = "0.1"
+libc = "0.2"
 
 

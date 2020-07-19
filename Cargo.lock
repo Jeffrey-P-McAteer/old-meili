@@ -610,9 +610,17 @@ name = "meili"
 version = "0.1.0"
 dependencies = [
  "app_dirs",
+ "cocoa",
+ "core-graphics",
+ "glib",
+ "gtk",
  "hostname",
+ "libappindicator",
+ "libc",
+ "objc",
+ "objc-foundation",
+ "objc_id",
  "serde",
- "systray",
  "toml",
  "winapi 0.3.9",
  "winres",
@@ -861,24 +869,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
-]
-
-[[package]]
-name = "systray"
-version = "0.4.0"
-source = "git+https://github.com/Jeffrey-P-McAteer/systray-rs.git#da95e20e5007086661f29c7c5144353e1d14aedc"
-dependencies = [
- "cocoa",
- "core-graphics",
- "glib",
- "gtk",
- "libappindicator",
- "libc",
- "log",
- "objc",
- "objc-foundation",
- "objc_id",
- "winapi 0.3.9",
 ]
 
 [[package]]

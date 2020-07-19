@@ -1,11 +1,43 @@
 
-use systray;
 use winapi;
 
+use std;
+use std::cell::RefCell;
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
+use std::sync::mpsc::{channel, Sender};
+use std::thread;
+use winapi::{
+    ctypes::{c_ulong, c_ushort},
+    shared::{
+        basetsd::ULONG_PTR,
+        guiddef::GUID,
+        minwindef::{DWORD, HINSTANCE, LPARAM, LRESULT, PBYTE, TRUE, UINT, WPARAM},
+        ntdef::LPCWSTR,
+        windef::{HBITMAP, HBRUSH, HICON, HMENU, HWND, POINT},
+    },
+    um::{
+        errhandlingapi, libloaderapi,
+        shellapi::{
+            self, NIF_ICON, NIF_MESSAGE, NIF_TIP, NIM_ADD, NIM_DELETE, NIM_MODIFY, NOTIFYICONDATAW,
+        },
+        winuser::{
+            self, CW_USEDEFAULT, IMAGE_ICON, LR_DEFAULTCOLOR, LR_LOADFROMFILE, MENUINFO,
+            MENUITEMINFOW, MFT_SEPARATOR, MFT_STRING, MIIM_FTYPE, MIIM_ID, MIIM_STATE, MIIM_STRING,
+            MIM_APPLYTOSUBMENUS, MIM_STYLE, MNS_NOTIFYBYPOS, WM_DESTROY, WM_USER, WNDCLASSW,
+            WS_OVERLAPPEDWINDOW,
+        },
+    },
+};
+
+// Got this idea from glutin. Yay open source! Boo stupid winproc! Even more boo
+// doing SetLongPtr tho.
+//thread_local!(static WININFO_STASH: RefCell<Option<WindowsLoopData>> = RefCell::new(None));
+
 use crate::config::Config;
+use crate::global::Global;
 
-
-pub fn open_gui(args: &Vec<String>, config: &Config) {
+pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
   // When no arguments are presented
   // we instruct the OS to close our console. If the user runs the meili
   // from a console it reads/writes to that console, and if they run it with "--gui"
@@ -26,23 +58,6 @@ pub fn open_gui(args: &Vec<String>, config: &Config) {
     }
   }
 
-  let mut app = systray::Application::new().expect("Cannot create graphics");
-  
-  // TODO embed + extract + assign icon file
-  //app.set_icon_from_file("/usr/share/gxkb/flags/ua.png").unwrap();
 
-  let hostname_s = format!("h: {}", config.hostname);
-  app.add_menu_item(&hostname_s, |_| {
-      
-      // TODO real menu items
-      println!("Printing a thing!");
 
-      Ok::<_, systray::Error>(())
-  }).unwrap();
-
-  app.add_menu_item("quit", |_| -> Result<(), systray::Error> {
-      std::process::exit(0)
-  }).unwrap();
-
-  app.wait_for_message().unwrap();
 }

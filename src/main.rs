@@ -7,6 +7,7 @@ use std::fs;
 
 mod gui;
 mod config;
+mod global;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 const APP_INFO: app_dirs::AppInfo = app_dirs::AppInfo{
@@ -60,13 +61,13 @@ fn main() {
       fs::write(config_file.as_path(), include_str!("meili.toml")).expect("Could not write default meili.toml");
     }
     let config = config::read_config( &config_file.as_path() );
-
+    let global = global::Global::default();
 
     // Now we execute things. This mostly consists of forwarding the input data to functions.
     match action {
       Action::PrintAbout => { print_about(&app_dir, &config); }
       Action::PrintUsage => { print_usage(); }
-      Action::OpenGui => { gui::open_gui(&args, &config); }
+      Action::OpenGui => { gui::open_gui(&args, &config, &global); }
     }
 
 }
