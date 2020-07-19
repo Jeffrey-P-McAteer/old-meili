@@ -5,5 +5,8 @@
 # When the value has a length < 4 we replace it with the system hostname.
 hostname = ""
 
-
+[[ip_ranges_to_scan]]
+name = "Optional Name - ipv4 local multicast block"
+begin = "239.0.0.0"
+end = "239.255.255.255"
 

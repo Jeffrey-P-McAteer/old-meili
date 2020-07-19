@@ -5,18 +5,26 @@ use hostname;
 
 use std::path::{Path};
 use std::fs;
+use std::net::IpAddr;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
   pub hostname: String,
-  
+  pub ip_ranges_to_scan: Vec<IPRange>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct IPRange {
+  pub name: Option<String>,
+  pub begin: IpAddr,
+  pub end: IpAddr,
 }
 
 impl Default for Config {
   fn default() -> Config {
     Config {
       hostname: String::new(),
-
+      ip_ranges_to_scan: Vec::new(),
     }
   }
 }
