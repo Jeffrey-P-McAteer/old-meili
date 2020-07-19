@@ -5,8 +5,18 @@
 # When the value has a length < 4 we replace it with the system hostname.
 hostname = ""
 
+# Users may specify as many [[ip_ranges_to_scan]]
+# items as they wany (including none), the name
+# field is optional. begin and end may be IPv4 or IPv6
+# addresses, but they must both be the same type (eg no ipv4 begin
+# and ipv6 end).
 [[ip_ranges_to_scan]]
 name = "Optional Name - ipv4 local multicast block"
 begin = "239.0.0.0"
 end = "239.255.255.255"
+
+[[ip_ranges_to_scan]]
+name = "some ipv6 link local range"
+begin = "fe80:1::1"
+end = "fe80:2::ff"
 
