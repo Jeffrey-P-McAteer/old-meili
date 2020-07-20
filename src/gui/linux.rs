@@ -12,14 +12,28 @@ use std::{
     thread,
     error,
     fmt,
+    fs,
 };
+
+use tempfile;
 
 
 use crate::config::Config;
 use crate::global::Global;
 
 pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
+  let icon_tmp = tempfile::Builder::new()
+                    .suffix(".png")
+                    .rand_bytes(5)
+                    .tempfile().expect("Could not make temp file for icon");
+                    
+  if let Err(e) = fs::write(icon_tmp.path(), super::ICON_PNG) {
+    println!("Error writing temp icon png: {:?}", e);
+  }
+
   if let Ok(mut app) = Application::new() {
+
+    app.set_icon_from_file( &icon_tmp.path().to_string_lossy() );
 
     let hostname_s = format!("h: {}", config.hostname);
     app.add_menu_item(&hostname_s, |_| {
