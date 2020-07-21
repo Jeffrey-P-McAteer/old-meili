@@ -8,7 +8,7 @@ use std::os::windows::ffi::OsStrExt;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::{
     collections::HashMap,
-    error, fmt
+    error, fmt, fs
 };
 
 use std::thread;
@@ -35,9 +35,8 @@ use winapi::{
     },
 };
 
-// Got this idea from glutin. Yay open source! Boo stupid winproc! Even more boo
-// doing SetLongPtr tho.
-//thread_local!(static WININFO_STASH: RefCell<Option<WindowsLoopData>> = RefCell::new(None));
+use tempfile;
+
 
 use crate::config::Config;
 use crate::global::Global;
@@ -63,7 +62,24 @@ pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
     }
   }
 
+  let icon_tmp = tempfile::Builder::new()
+                    .suffix(".png")
+                    .rand_bytes(5)
+                    .tempfile().expect("Could not make temp file for icon");
+                    
+  if let Err(e) = fs::write(icon_tmp.path(), super::ICON_PNG) {
+    println!("Error writing temp icon png: {:?}", e);
+  }
+
   if let Ok(mut app) = Application::new() {
+
+    if let Err(e) = app.set_icon_from_file( &icon_tmp.path().to_string_lossy() ) {
+        println!("e = {:?}", e);
+    }
+    
+    if let Err(e) = app.set_icon_from_buffer(&super::ICON_PNG, 256, 256) {
+        println!("e = {:?}", e);
+    }
 
     let hostname_s = format!("h: {}", config.hostname);
     app.add_menu_item(&hostname_s, |_| {
