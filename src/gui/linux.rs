@@ -16,6 +16,7 @@ use std::{
 };
 
 use tempfile;
+use crossbeam;
 
 
 use crate::config::Config;
@@ -43,7 +44,34 @@ pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
   
         Ok::<_, Error>(())
     }).unwrap();
-   
+
+    app.add_menu_item("dis_i=first", |_| -> Result<(), Error> {
+        println!("Printing dis_i=first");
+        Ok(())
+    }).unwrap();
+
+    // We perform a double mutable borrow of `app` on a seperate thread.
+    // This is seriously unsafe but graphics is always like that.
+    let app_ptr = &mut app as *mut _;
+    let app_ptr_i: usize = unsafe { std::mem::transmute(app_ptr) };
+    thread::spawn(move || {
+        let app_ptr: *mut _ = unsafe { std::mem::transmute(app_ptr_i) };
+        let app: &mut Application = unsafe { &mut *app_ptr };
+        let mut i = 0;
+        loop {
+            std::thread::sleep( std::time::Duration::from_millis(800) );
+            let dis_i = i;
+            app.set_menu_item(1, &format!("dis_i={}", dis_i), move |_| {
+                
+                // TODO real menu items
+                println!("Printing a dis_i={}", dis_i);
+          
+                Ok::<_, Error>(())
+            }).unwrap();
+            i += 1;
+        }
+    });
+
     app.add_menu_item("quit", |_| -> Result<(), Error> {
         std::process::exit(0)
     }).unwrap();
@@ -155,6 +183,15 @@ impl GtkSystrayApp {
         self.menu.show_all();
     }
 
+    pub fn set_menu_item(&self, item_idx: u32, item_name: &str) {
+        let mut menu_items = self.menu_items.borrow_mut();
+        if menu_items.contains_key(&item_idx) {
+            let m: &gtk::MenuItem = menu_items.get(&item_idx).unwrap();
+            m.set_label(item_name);
+            self.menu.show_all();
+        }
+    }
+
     pub fn set_icon_from_file(&self, file: &str) {
         let mut ai = self.ai.borrow_mut();
         ai.set_icon_full(file, "icon");
@@ -193,6 +230,14 @@ impl Window {
         let n = item_name.to_owned().clone();
         run_on_gtk_thread(move |stash: &GtkSystrayApp| {
             stash.add_menu_entry(item_idx, &n);
+        });
+        Ok(())
+    }
+
+    pub fn set_menu_entry(&self, item_idx: u32, item_name: &str) -> Result<(), Error> {
+        let n = item_name.to_owned().clone();
+        run_on_gtk_thread(move |stash: &GtkSystrayApp| {
+            stash.set_menu_item(item_idx, &n);
         });
         Ok(())
     }
@@ -317,6 +362,18 @@ impl Application {
         }
         self.callback.insert(idx, make_callback(f));
         self.menu_idx += 1;
+        Ok(idx)
+    }
+
+    pub fn set_menu_item<F, E>(&mut self, idx: u32, item_name: &str, f: F) -> Result<u32, Error>
+    where
+        F: FnMut(&mut Application) -> Result<(), E> + Send + Sync + 'static,
+        E: error::Error + Send + Sync + 'static,
+    {
+        if let Err(e) = self.window.set_menu_entry(idx, item_name) {
+            return Err(e);
+        }
+        self.callback.insert(idx, make_callback(f));
         Ok(idx)
     }
 
