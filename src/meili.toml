@@ -5,6 +5,24 @@
 # When the value has a length < 4 we replace it with the system hostname.
 hostname = ""
 
+# How long should the network thread sleep between checking
+# sockets for packets? High values will burn fewer CPU cycles
+# but will handle fewer total packets per second, while low
+# values will use 100% of a CPU and handle as many packets as possible
+# per second.
+# Value is in Nanoseconds (1000000000 = 1s, 1000000 = 1ms),
+# default is 4ms (4000000ns)
+poll_delay_ns = 4000000
+
+[[udp_sockets_to_listen_on]]
+name = "Default meili LAN multicast address"
+socket = "239.10.10.10:1337"
+
+[[udp_sockets_to_listen_on]]
+name = "Default meili local address"
+socket = "0.0.0.0:1337"
+
+
 # Users may specify as many [[ip_ranges_to_scan]]
 # items as they wany (including none), the name
 # field is optional. begin and end may be IPv4 or IPv6

@@ -4,10 +4,12 @@ use app_dirs;
 use std::path::{Path,PathBuf};
 use std::env;
 use std::fs;
+use std::sync::Arc;
 
 mod gui;
 mod config;
 mod global;
+mod net;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 const APP_INFO: app_dirs::AppInfo = app_dirs::AppInfo{
@@ -63,11 +65,18 @@ fn main() {
     let config = config::read_config( &config_file.as_path() );
     let global = global::Global::default();
 
+    let args = Arc::new(args);
+    let config = Arc::new(config);
+    let global = Arc::new(global);
+
     // Now we execute things. This mostly consists of forwarding the input data to functions.
     match action {
       Action::PrintAbout => { print_about(&app_dir, &config); }
       Action::PrintUsage => { print_usage(); }
-      Action::OpenGui => { gui::open_gui(&args, &config, &global); }
+      Action::OpenGui => {
+        net::spawn_listeners(args.clone(), config.clone(), global.clone());
+        gui::open_gui(args.clone(), config.clone(), global.clone());
+      }
     }
 
 }

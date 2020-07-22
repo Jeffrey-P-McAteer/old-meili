@@ -5,6 +5,7 @@
  * of meili.
  */
 
+#[derive(Debug)]
 pub struct Global {
   
 }

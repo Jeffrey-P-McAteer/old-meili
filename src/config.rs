@@ -5,12 +5,14 @@ use hostname;
 
 use std::path::{Path};
 use std::fs;
-use std::net::IpAddr;
+use std::net::{IpAddr,SocketAddr};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
   pub hostname: String,
+  pub poll_delay_ns: usize,
   pub ip_ranges_to_scan: Vec<IPRange>,
+  pub udp_sockets_to_listen_on: Vec<ConfSocket>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -20,11 +22,19 @@ pub struct IPRange {
   pub end: IpAddr,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConfSocket {
+  pub name: Option<String>,
+  pub socket: SocketAddr,
+}
+
 impl Default for Config {
   fn default() -> Config {
     Config {
       hostname: String::new(),
+      poll_delay_ns: 4000,
       ip_ranges_to_scan: Vec::new(),
+      udp_sockets_to_listen_on: Vec::new(),
     }
   }
 }

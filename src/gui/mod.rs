@@ -8,6 +8,8 @@
  * among other OS-specific requirements for graphics.
  */
 
+use std::sync::Arc;
+
 use crate::config::Config;
 use crate::global::Global;
 
@@ -25,15 +27,15 @@ mod win;
 #[cfg(target_os = "linux")]
 mod linux;
 
-pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
+pub fn open_gui(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
   // TODO spawn a thread to perform bg tasks using global
 
   #[cfg(target_os = "linux")]
-  linux::open_gui(args, config, global);
+  linux::open_gui(&args, &config, &global);
   
   #[cfg(target_os = "windows")]
-  win::open_gui(args, config, global);
+  win::open_gui(&args, &config, &global);
 
   #[cfg(target_os = "macos")]
-  macos::open_gui(args, config, global);
+  macos::open_gui(&args, &config, &global);
 }
