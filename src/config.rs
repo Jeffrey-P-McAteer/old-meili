@@ -10,8 +10,16 @@ use std::net::{IpAddr,SocketAddr};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
   pub hostname: String,
+  
   pub poll_delay_ns: usize,
+  
+  pub attempt_upnp_port_forward: bool,
+  pub upnp_gw_timeout_ms: usize,
+  pub upnp_pref_public_port: usize,
+  pub upnp_local_port: usize,
+
   pub ip_ranges_to_scan: Vec<IPRange>,
+  
   pub udp_sockets_to_listen_on: Vec<ConfSocket>
 }
 
@@ -32,7 +40,13 @@ impl Default for Config {
   fn default() -> Config {
     Config {
       hostname: String::new(),
-      poll_delay_ns: 4000,
+      poll_delay_ns: 4000000,
+
+      attempt_upnp_port_forward: true,
+      upnp_gw_timeout_ms: 5000,
+      upnp_pref_public_port: 1337,
+      upnp_local_port: 1337,
+
       ip_ranges_to_scan: Vec::new(),
       udp_sockets_to_listen_on: Vec::new(),
     }

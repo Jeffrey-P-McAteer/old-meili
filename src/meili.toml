@@ -14,13 +14,25 @@ hostname = ""
 # default is 4ms (4000000ns)
 poll_delay_ns = 4000000
 
-[[udp_sockets_to_listen_on]]
-name = "Default meili LAN multicast address"
-socket = "239.10.10.10:1337"
+# This causes meili to autodiscover a router
+# and ask for any public UDP port to be forwarded.
+# We first ask for pref_upnp_public_port specifically, and
+# if that fails we ask for a random public port.
+# upnp_local_port must point to a local port opened by
+# a udp_sockets_to_listen_on entry.
+attempt_upnp_port_forward = true
+upnp_gw_timeout_ms = 5000
+upnp_pref_public_port = 1337
+upnp_local_port = 1337
+
 
 [[udp_sockets_to_listen_on]]
 name = "Default meili local address"
 socket = "0.0.0.0:1337"
+
+[[udp_sockets_to_listen_on]]
+name = "Default meili LAN multicast address"
+socket = "239.10.10.10:1338"
 
 
 # Users may specify as many [[ip_ranges_to_scan]]

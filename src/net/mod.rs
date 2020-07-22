@@ -1,12 +1,14 @@
 
+use igd;
+
 use std::thread;
 use std::sync::Arc;
 use std::io;
+use std::time::Duration;
 use std::net::{
   UdpSocket,
-  SocketAddr,
+  SocketAddr, SocketAddrV4,
   IpAddr, Ipv4Addr,
-
 };
 
 use crate::config::Config;
@@ -36,10 +38,14 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
         if conf_socket.socket.ip().is_multicast() {
           match conf_socket.socket.ip() {
             IpAddr::V4(ip_a) => {
-              s.join_multicast_v4(&ip_a, &Ipv4Addr::new(0,0,0,0));
+              if let Err(e) = s.join_multicast_v4(&ip_a, &Ipv4Addr::new(0,0,0,0)) {
+                println!("e={:?}", e);
+              }
             }
             IpAddr::V6(ip_a) => {
-              s.join_multicast_v6(&ip_a, 0);
+              if let Err(e) = s.join_multicast_v6(&ip_a, 0) {
+                println!("e={:?}", e);
+              }
             }
           }
         }
@@ -51,6 +57,16 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
       }
     }
   }
+
+  // We spawn this to a thread b/c attempt_upnp_setup blocks
+  let upnp_args = args.clone();
+  let upnp_config = config.clone();
+  let upnp_global = global.clone();
+  thread::spawn(move || {
+    if let Err(e) = attempt_upnp_setup(&upnp_args, &upnp_config, &upnp_global) {
+      println!("upnp e={:?}", e);
+    }
+  });
 
   let mut net_buf = [0; NET_BUFF_SIZE];
   loop {
@@ -66,11 +82,30 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
           continue;
         }
         Err(e) => {
-          println!("e={:?}", e);
+          println!("socket e={:?}", e);
         },
       }
     }
 
-    std::thread::sleep( std::time::Duration::from_nanos(*&config.poll_delay_ns as u64) );
+    std::thread::sleep( Duration::from_nanos(*&config.poll_delay_ns as u64) );
   }
 }
+
+fn attempt_upnp_setup(args: &Vec<String>, config: &Config, global: &Global) -> Result<(), igd::Error> {
+  if !config.attempt_upnp_port_forward {
+    return Ok(());
+  }
+
+  let igd_opts = igd::SearchOptions {
+    timeout: Some(Duration::from_millis(config.upnp_gw_timeout_ms as u64)),
+    ..Default::default()
+  };
+  let gw = igd::search_gateway(igd_opts)?;
+
+  let local_addr = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), config.upnp_local_port as u16);
+  gw.add_port(igd::PortMappingProtocol::UDP, 80, local_addr, 60, "meili port mapping")?;
+
+
+  Ok(())
+}
+
