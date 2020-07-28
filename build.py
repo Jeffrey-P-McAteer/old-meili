@@ -13,7 +13,10 @@ def check_dependencies():
   print("TODO implement something useful in check_dependencies");
 
 def build_for(target_triple):
-  print("Building ./target/{}/release/meili".format(target_triple))
+  print("Building ./target/{}/release/{}".format(
+    target_triple,
+    "meili.exe" if "windows" in target_triple else "meili"
+  ))
   subprocess.run([
     'cargo', 'build', '--release', '--target={}'.format(target_triple)
   ]).check_returncode()
@@ -27,13 +30,6 @@ def main(argv):
   build_for("x86_64-pc-windows-gnu")
   build_for("x86_64-apple-darwin")
 
-  if "azure-angel" in str(platform.node()):
-    print("Detected azure-angel, moving app builds for testing on other hosts...")
-    subprocess.run(['sh', '-c',
-      'cp target/x86_64-unknown-linux-gnu/release/meili /j/public/meili_linux ;'+
-      'cp target/x86_64-pc-windows-gnu/release/meili.exe /j/public/meili_win.exe ;'+
-      'cp target/x86_64-apple-darwin/release/meili /j/public/meili_macos'
-    ]).check_returncode()
 
 if __name__ == '__main__':
   main(sys.argv)
