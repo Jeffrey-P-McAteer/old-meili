@@ -1,5 +1,7 @@
 
 use igd;
+
+#[cfg(not(windows))]
 use get_if_addrs;
 
 use std::thread;
@@ -106,24 +108,31 @@ fn attempt_upnp_setup(args: &Vec<String>, config: &Config, global: &Global) -> R
 
   let mut lan_ip_a: Ipv4Addr = Ipv4Addr::BROADCAST;
   // We pick the first 
-  match get_if_addrs::get_if_addrs() {
-    Ok(if_addrs) => {
-      for addr in if_addrs {
-        if addr.is_loopback() {
-          continue;
-        }
-        // igd only takes SocketAddrV4 so we cannot use ipv6 for this :(
-        if let IpAddr::V4(addr) = addr.ip() {
-          lan_ip_a = addr;
-          break;
+  #[cfg(not(windows))]
+  {
+    match get_if_addrs::get_if_addrs() {
+      Ok(if_addrs) => {
+        for addr in if_addrs {
+          if addr.is_loopback() {
+            continue;
+          }
+          // igd only takes SocketAddrV4 so we cannot use ipv6 for this :(
+          if let IpAddr::V4(addr) = addr.ip() {
+            lan_ip_a = addr;
+            break;
+          }
         }
       }
+      Err(e) => {
+        println!("e={:?}", e);
+        // Not exactly the most appropriate error but we'll use it
+        return Err(igd::Error::GetExternalIpError( igd::GetExternalIpError::ActionNotAuthorized ));
+      }
     }
-    Err(e) => {
-      println!("e={:?}", e);
-      // Not exactly the most appropriate error but we'll use it
-      return Err(igd::Error::GetExternalIpError( igd::GetExternalIpError::ActionNotAuthorized ));
-    }
+  }
+  #[cfg(windows)]
+  {
+    // TODO windows IP addr lookup
   }
   println!("lan_ip_a={:?}", &lan_ip_a);
 
