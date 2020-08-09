@@ -10,10 +10,11 @@ use std::io;
 use std::time::Duration;
 use std::net::{
   UdpSocket,
-  SocketAddr, SocketAddrV4,
+  SocketAddrV4,
   IpAddr, Ipv4Addr,
 };
 
+use crate::punwrap_r;
 use crate::config::Config;
 use crate::global::Global;
 
@@ -35,20 +36,16 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
     let name = conf_socket.name.clone().unwrap_or("".to_string());
     println!("Listening to '{}' ({:?})", name, conf_socket.socket);
     match UdpSocket::bind(&conf_socket.socket) {
-      Ok(mut s) => {
-        s.set_nonblocking(true);
+      Ok(s) => {
+        punwrap_r!(s.set_nonblocking(true), nothing);
 
         if conf_socket.socket.ip().is_multicast() {
           match conf_socket.socket.ip() {
             IpAddr::V4(ip_a) => {
-              if let Err(e) = s.join_multicast_v4(&ip_a, &Ipv4Addr::new(0,0,0,0)) {
-                println!("e={:?}", e);
-              }
+              punwrap_r!(s.join_multicast_v4(&ip_a, &Ipv4Addr::new(0,0,0,0)), nothing);
             }
             IpAddr::V6(ip_a) => {
-              if let Err(e) = s.join_multicast_v6(&ip_a, 0) {
-                println!("e={:?}", e);
-              }
+              punwrap_r!(s.join_multicast_v6(&ip_a, 0), nothing);
             }
           }
         }
@@ -94,7 +91,7 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
   }
 }
 
-fn attempt_upnp_setup(args: &Vec<String>, config: &Config, global: &Global) -> Result<(), igd::Error> {
+fn attempt_upnp_setup(_args: &Vec<String>, config: &Config, _global: &Global) -> Result<(), igd::Error> {
   if !config.attempt_upnp_port_forward {
     return Ok(());
   }
@@ -161,7 +158,7 @@ fn attempt_upnp_setup(args: &Vec<String>, config: &Config, global: &Global) -> R
         println!("re={:?}", re);
         continue;
       }
-      Err(e)  => {
+      Err(_e)  => {
         break;
       }
     }

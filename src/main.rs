@@ -1,7 +1,7 @@
 
 use app_dirs;
 
-use std::path::{Path,PathBuf};
+use std::path::{PathBuf};
 use std::env;
 use std::fs;
 use std::sync::Arc;
@@ -10,6 +10,7 @@ mod gui;
 mod config;
 mod global;
 mod net;
+mod util;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 const APP_INFO: app_dirs::AppInfo = app_dirs::AppInfo{
@@ -86,11 +87,9 @@ fn main() {
         gui::open_gui(args.clone(), config.clone(), global.clone());
       }
       Action::RunCLI => {
-        net::spawn_listeners(args.clone(), config.clone(), global.clone());
         gui::open_cli(args.clone(), config.clone(), global.clone());
       }
       Action::RunNetCLI => {
-        net::spawn_listeners(args.clone(), config.clone(), global.clone());
         gui::start_tcp_cli(args.clone(), config.clone(), global.clone());
       }
     }

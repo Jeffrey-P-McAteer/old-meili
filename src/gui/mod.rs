@@ -13,18 +13,24 @@ use std::sync::Arc;
 use crate::config::Config;
 use crate::global::Global;
 
+#[allow(dead_code, unused_variables)]
 const ICON_PNG: &'static [u8] = include_bytes!("../../res/icon.png");
+#[allow(dead_code, unused_variables)]
 const ICON_ICO: &'static [u8] = include_bytes!("../../res/icon.ico");
+//#[allow(dead_code, unused_variables)]
 //const icon_: &'static [u8; N] icon_png = include_bytes!("../res/icon.png");
 
 
 #[cfg(target_os = "macos")]
+#[allow(dead_code, unused_variables)]
 mod macos;
 
 #[cfg(target_os = "windows")]
+#[allow(dead_code, unused_variables)]
 mod win;
 
 #[cfg(target_os = "linux")]
+#[allow(dead_code, unused_variables)]
 mod linux;
 
 mod cli;

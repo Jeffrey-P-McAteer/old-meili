@@ -14,7 +14,7 @@ use humantime;
 
 use std::path::{Path};
 use std::fs;
-use std::net::{IpAddr,SocketAddr};
+use std::net::{SocketAddr};
 use std::fmt;
 
 #[derive(Debug)]

@@ -16,9 +16,9 @@ use std::{
 };
 
 use tempfile;
-use crossbeam;
+//use crossbeam;
 
-
+use crate::punwrap_r;
 use crate::config::Config;
 use crate::global::Global;
 
@@ -34,7 +34,7 @@ pub fn open_gui(args: &Vec<String>, config: &Config, global: &Global) {
 
   if let Ok(mut app) = Application::new() {
 
-    app.set_icon_from_file( &icon_tmp.path().to_string_lossy() );
+    punwrap_r!(app.set_icon_from_file( &icon_tmp.path().to_string_lossy() ));
 
     let hostname_s = format!("h: {}", config.hostname);
     app.add_menu_item(&hostname_s, |_| {
@@ -102,15 +102,15 @@ pub struct GtkSystrayApp {
 
 thread_local!(static GTK_STASH: RefCell<Option<GtkSystrayApp>> = RefCell::new(None));
 
-struct MenuItemInfo {
-    mid: u32,
-    title: String,
-    tooltip: String,
-    disabled: bool,
-    checked: bool,
-}
+// struct MenuItemInfo {
+//     mid: u32,
+//     title: String,
+//     tooltip: String,
+//     disabled: bool,
+//     checked: bool,
+// }
 
-type GtkCallback = Box<(Fn(&GtkSystrayApp) -> () + 'static)>;
+//type GtkCallback = Box<(Fn(&GtkSystrayApp) -> () + 'static)>;
 
 // Convenience function to clean up thread local unwrapping
 fn run_on_gtk_thread<F>(f: F)
@@ -184,7 +184,7 @@ impl GtkSystrayApp {
     }
 
     pub fn set_menu_item(&self, item_idx: u32, item_name: &str) {
-        let mut menu_items = self.menu_items.borrow_mut();
+        let menu_items = self.menu_items.borrow_mut();
         if menu_items.contains_key(&item_idx) {
             let m: &gtk::MenuItem = menu_items.get(&item_idx).unwrap();
             m.set_label(item_name);
@@ -198,10 +198,12 @@ impl GtkSystrayApp {
     }
 }
 
+#[allow(dead_code)]
 struct Window {
     gtk_loop: Option<thread::JoinHandle<()>>,
 }
 
+#[allow(dead_code)]
 impl Window {
     pub fn new(event_tx: Sender<SystrayEvent>) -> Result<Window, Error> {
         let (tx, rx) = channel();
@@ -209,11 +211,10 @@ impl Window {
             GTK_STASH.with(|stash| match GtkSystrayApp::new(event_tx) {
                 Ok(data) => {
                     (*stash.borrow_mut()) = Some(data);
-                    tx.send(Ok(()));
+                    punwrap_r!(tx.send(Ok(())));
                 }
                 Err(e) => {
-                    tx.send(Err(e));
-                    return;
+                    punwrap_r!(tx.send(Err(e)), return);
                 }
             });
             gtk::main();
@@ -280,6 +281,7 @@ impl Window {
 
 type BoxedError = Box<dyn error::Error + Send + Sync + 'static>;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum Error {
     OsError(String),
@@ -337,6 +339,7 @@ where
     }) as Callback
 }
 
+#[allow(dead_code)]
 impl Application {
     pub fn new() -> Result<Application, Error> {
         let (event_tx, event_rx) = channel();

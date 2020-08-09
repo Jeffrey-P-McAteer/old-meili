@@ -7,8 +7,8 @@
 use shrust::{Shell, ShellIO, ExecError};
 
 use std::io::prelude::*;
-use std::ops::FnOnce;
 
+use crate::punwrap_r;
 use crate::config::Config;
 use crate::global::Global;
 
@@ -18,7 +18,7 @@ pub fn open_cli(args: &Vec<String>, config: &Config, global: &Global) {
 }
 
 pub fn start_tcp_cli(args: &Vec<String>, config: &Config, global: &Global) {
-  use std::net::{TcpListener, Shutdown, SocketAddr};
+  use std::net::{TcpListener};
   use std::thread;
 
   let serv = TcpListener::bind("[::]:1339").expect("Cannot open socket");
@@ -35,8 +35,8 @@ pub fn start_tcp_cli(args: &Vec<String>, config: &Config, global: &Global) {
         }
         else {
           println!("non-local conn addr={:?}", &addr);
-          sock.write("No non-local connections allowed".as_bytes());
-          sock.flush();
+          punwrap_r!(sock.write("No non-local connections allowed".as_bytes()), nothing);
+          punwrap_r!(sock.flush(), nothing);
         }
       }
       Err(e) => {
@@ -49,7 +49,7 @@ pub fn start_tcp_cli(args: &Vec<String>, config: &Config, global: &Global) {
 /**
  * This creates a shell which may be presented over any IO device.
  */
-pub fn create_shell(args: &Vec<String>, config: &Config, global: &Global) -> shrust::Shell<()> {
+pub fn create_shell(_args: &Vec<String>, _config: &Config, _global: &Global) -> shrust::Shell<()> {
   let mut shell = Shell::new(());
 
   shell.new_command("status", "Get the status of network comms and local settings", 0, |io, _shell_data, cmd_args| {
