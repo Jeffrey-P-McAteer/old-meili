@@ -73,7 +73,17 @@ pub fn create_shell<'a>(args: &'a Vec<String>, config: &'a Config, global: &'a G
       Ok(())
   });
 
+  shell.new_command("scan-ips", "[start|stop] Start/stop the background scanning IP addresses.", 0, |io, shell_data, cmd_args| {
+      let (args, config, global) = shell_data;
+      let arg0: &str = cmd_args.get(0).unwrap_or(&"");
+      global.set_scan_ips_in_background(!arg0.contains("stop"));
+      Ok(())
+  });
+
   shell.new_command_noargs("quit", "Exit the meili process", |_, _shell_data| {
+    Err(ExecError::Quit)
+  });
+  shell.new_command_noargs("exit", "Exit the meili process", |_, _shell_data| {
     Err(ExecError::Quit)
   });
 

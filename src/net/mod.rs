@@ -21,6 +21,23 @@ use crate::global::Global;
 //const NET_BUFF_SIZE: usize = 65535;
 const NET_BUFF_SIZE: usize = 32535;
 
+
+pub fn spawn_ip_scanning(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
+  thread::spawn(move || {
+    run_ip_scanning(args, config, global);
+  });
+}
+
+pub fn run_ip_scanning(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
+  loop {
+    if global.get_scan_ips_in_background() {
+      println!("Running IP scanning");
+      
+    }
+    thread::sleep(Duration::from_millis(250));
+  }
+}
+
 pub fn spawn_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
   thread::spawn(move || {
     run_listeners(args, config, global);

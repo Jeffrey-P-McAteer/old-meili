@@ -84,12 +84,15 @@ fn main() {
       Action::PrintUsage => { print_usage(); }
       Action::OpenGui => {
         net::spawn_listeners(args.clone(), config.clone(), global.clone());
+        net::spawn_ip_scanning(args.clone(), config.clone(), global.clone());
         gui::open_gui(args.clone(), config.clone(), global.clone());
       }
       Action::RunCLI => {
+        net::spawn_ip_scanning(args.clone(), config.clone(), global.clone());
         gui::open_cli(args.clone(), config.clone(), global.clone());
       }
       Action::RunNetCLI => {
+        net::spawn_ip_scanning(args.clone(), config.clone(), global.clone());
         gui::start_tcp_cli(args.clone(), config.clone(), global.clone());
       }
     }
