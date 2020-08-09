@@ -53,7 +53,7 @@ ip_range_scan_seed = 12345
 name = "Optional Name - ipv4 local multicast block"
 cidr = "239.0.0.0/8"
 max_ips_per_second = 150
-rescan_age = 36h
+rescan_age = "36h"
 
 [[ip_ranges_to_scan]]
 name = "some ipv6 link local range"

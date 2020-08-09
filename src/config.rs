@@ -119,17 +119,32 @@ pub struct Config {
   pub upnp_pref_public_port: usize,
   pub upnp_local_port: usize,
 
+  #[serde(default = "default_ip_range_scan_seed")]
   pub ip_range_scan_seed: usize,
   pub ip_ranges_to_scan: Vec<IPRange>,
   
   pub udp_sockets_to_listen_on: Vec<ConfSocket>
 }
 
+fn default_ip_range_scan_seed() -> usize {
+  12345 // TODO replace w/ hash of hostname
+}
+fn default_max_ips_per_second() -> usize {
+  100
+}
+fn default_rescan_age() -> MeiliHumanDuration {
+  MeiliHumanDuration( "24h".parse::<humantime::Duration>().unwrap().into() )
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IPRange {
   pub name: Option<String>,
   pub cidr: MeiliIpCidr,
-  pub max_ips_per_second: u64,
+
+  #[serde(default = "default_max_ips_per_second")]
+  pub max_ips_per_second: usize,
+  
+  #[serde(default = "default_rescan_age")]
   pub rescan_age: MeiliHumanDuration,
 }
 
@@ -150,7 +165,7 @@ impl Default for Config {
       upnp_pref_public_port: 1337,
       upnp_local_port: 1337,
 
-      ip_range_scan_seed: 12345, // TODO replace w/ hash of hostname?
+      ip_range_scan_seed: default_ip_range_scan_seed(),
       ip_ranges_to_scan: Vec::new(),
 
       udp_sockets_to_listen_on: Vec::new(),
