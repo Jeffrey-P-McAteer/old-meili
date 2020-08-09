@@ -25,7 +25,6 @@ upnp_gw_timeout_ms = 5000
 upnp_pref_public_port = 1337
 upnp_local_port = 1337
 
-
 [[udp_sockets_to_listen_on]]
 name = "Default meili local address"
 socket = "0.0.0.0:1337"
@@ -35,18 +34,28 @@ name = "Default meili LAN multicast address"
 socket = "239.10.10.10:1338"
 
 
+# When scanning ip address ranges this number is used
+# to seed the random walk which is performed over the
+# range. By re-using the seed we can perform a random
+# scan which is resumable. If this value is not set in meili.toml
+# a 64-bit hash of the hostname is used.
+ip_range_scan_seed = 12345
+
 # Users may specify as many [[ip_ranges_to_scan]]
 # items as they wany (including none), the name
-# field is optional. begin and end may be IPv4 or IPv6
-# addresses, but they must both be the same type (eg no ipv4 begin
-# and ipv6 end).
+# field is optional.
+# the cidr field is required and specifies the network to scan.
+# The max_ips_per_second field limits how many IPs are
+# scanned per second, if omitted it defaults to 100.
+# The rescan_age field specifies when to re-scan an IP address,
+# defaulting to 24 hours.
 [[ip_ranges_to_scan]]
 name = "Optional Name - ipv4 local multicast block"
-begin = "239.0.0.0"
-end = "239.255.255.255"
+cidr = "239.0.0.0/8"
+max_ips_per_second = 150
+rescan_age = 36h
 
 [[ip_ranges_to_scan]]
 name = "some ipv6 link local range"
-begin = "fe80:1::1"
-end = "fe80:2::ff"
+cidr = "fe80:1::1/64"
 

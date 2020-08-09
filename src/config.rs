@@ -1,11 +1,112 @@
 
-use serde::{Serialize, Deserialize};
+use serde::{
+  Serialize, Deserialize,
+  Serializer, Deserializer,
+  de,
+  de::Visitor, de::Unexpected,
+};
 use toml;
 use hostname;
+
+use cidr_utils;
+
+use humantime;
 
 use std::path::{Path};
 use std::fs;
 use std::net::{IpAddr,SocketAddr};
+use std::fmt;
+
+#[derive(Debug)]
+pub struct MeiliIpCidr(cidr_utils::cidr::IpCidr);
+
+impl Serialize for MeiliIpCidr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.0.to_string()[..])
+    }
+}
+
+struct MeiliIpCidrVisitor;
+impl<'de> Visitor<'de> for MeiliIpCidrVisitor {
+    type Value = MeiliIpCidr;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("an ipv4 or ipv6 CIDR string like 192.168.0.0/24 or fe80:1::1/64")
+    }
+
+    fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        if let Ok(ip_cidr) = cidr_utils::cidr::IpCidr::from_str(s) {
+            Ok( MeiliIpCidr(ip_cidr) )
+        } else {
+            Err(de::Error::invalid_value(Unexpected::Str(s), &self))
+        }
+    }
+
+}
+
+impl<'de> Deserialize<'de> for MeiliIpCidr {
+    fn deserialize<D>(deserializer: D) -> Result<MeiliIpCidr, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_string(MeiliIpCidrVisitor)
+    }
+}
+
+
+#[derive(Debug)]
+pub struct MeiliHumanDuration(humantime::Duration);
+
+impl Serialize for MeiliHumanDuration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.0.to_string()[..])
+    }
+}
+
+struct MeiliHumanDurationVisitor;
+impl<'de> Visitor<'de> for MeiliHumanDurationVisitor {
+    type Value = MeiliHumanDuration;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a human duration like '24h' or '1day 2hours'. See https://docs.rs/humantime/2.0.1/humantime/fn.parse_duration.html.")
+    }
+
+    fn visit_str<E>(self, s: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        if let Ok(ip_cidr) = s.parse::<humantime::Duration>() {
+            Ok( MeiliHumanDuration(ip_cidr) )
+        } else {
+            Err(de::Error::invalid_value(Unexpected::Str(s), &self))
+        }
+    }
+
+}
+
+impl<'de> Deserialize<'de> for MeiliHumanDuration {
+    fn deserialize<D>(deserializer: D) -> Result<MeiliHumanDuration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_string(MeiliHumanDurationVisitor)
+    }
+}
+
+
+
+
+
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -18,6 +119,7 @@ pub struct Config {
   pub upnp_pref_public_port: usize,
   pub upnp_local_port: usize,
 
+  pub ip_range_scan_seed: usize,
   pub ip_ranges_to_scan: Vec<IPRange>,
   
   pub udp_sockets_to_listen_on: Vec<ConfSocket>
@@ -26,8 +128,9 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct IPRange {
   pub name: Option<String>,
-  pub begin: IpAddr,
-  pub end: IpAddr,
+  pub cidr: MeiliIpCidr,
+  pub max_ips_per_second: u64,
+  pub rescan_age: MeiliHumanDuration,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,7 +150,9 @@ impl Default for Config {
       upnp_pref_public_port: 1337,
       upnp_local_port: 1337,
 
+      ip_range_scan_seed: 12345, // TODO replace w/ hash of hostname?
       ip_ranges_to_scan: Vec::new(),
+
       udp_sockets_to_listen_on: Vec::new(),
     }
   }

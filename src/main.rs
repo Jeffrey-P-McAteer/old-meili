@@ -21,6 +21,8 @@ enum Action {
   PrintAbout,
   PrintUsage,
   OpenGui,
+  RunCLI,
+  RunNetCLI,
 }
 
 fn main() {
@@ -42,6 +44,12 @@ fn main() {
         }
         "--gui" => {
           action = Action::OpenGui;
+        }
+        "--cli" => {
+          action = Action::RunCLI;
+        }
+        "--net-cli" => {
+          action = Action::RunNetCLI;
         }
         _unk => {
           // likely an arg to another arg. meili just ignores garbage arguments.
@@ -76,6 +84,14 @@ fn main() {
       Action::OpenGui => {
         net::spawn_listeners(args.clone(), config.clone(), global.clone());
         gui::open_gui(args.clone(), config.clone(), global.clone());
+      }
+      Action::RunCLI => {
+        net::spawn_listeners(args.clone(), config.clone(), global.clone());
+        gui::open_cli(args.clone(), config.clone(), global.clone());
+      }
+      Action::RunNetCLI => {
+        net::spawn_listeners(args.clone(), config.clone(), global.clone());
+        gui::start_tcp_cli(args.clone(), config.clone(), global.clone());
       }
     }
 

@@ -27,6 +27,8 @@ mod win;
 #[cfg(target_os = "linux")]
 mod linux;
 
+mod cli;
+
 pub fn open_gui(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
   // TODO spawn a thread to perform bg tasks using global
 
@@ -39,3 +41,13 @@ pub fn open_gui(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>
   #[cfg(target_os = "macos")]
   macos::open_gui(&args, &config, &global);
 }
+
+
+pub fn open_cli(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
+  cli::open_cli(&args, &config, &global);
+}
+
+pub fn start_tcp_cli(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Global>) {
+  cli::start_tcp_cli(&args, &config, &global);
+}
+
