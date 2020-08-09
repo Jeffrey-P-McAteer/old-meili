@@ -91,7 +91,7 @@ pub fn run_listeners(args: Arc<Vec<String>>, config: Arc<Config>, global: Arc<Gl
   }
 }
 
-fn attempt_upnp_setup(_args: &Vec<String>, config: &Config, _global: &Global) -> Result<(), igd::Error> {
+pub fn attempt_upnp_setup(_args: &Vec<String>, config: &Config, _global: &Global) -> Result<(), igd::Error> {
   if !config.attempt_upnp_port_forward {
     return Ok(());
   }

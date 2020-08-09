@@ -11,6 +11,7 @@ use std::io::prelude::*;
 use crate::punwrap_r;
 use crate::config::Config;
 use crate::global::Global;
+use crate::net;
 
 pub fn open_cli(args: &Vec<String>, config: &Config, global: &Global) {
   let mut shell = create_shell(args, config, global);
@@ -49,11 +50,30 @@ pub fn start_tcp_cli(args: &Vec<String>, config: &Config, global: &Global) {
 /**
  * This creates a shell which may be presented over any IO device.
  */
-pub fn create_shell(_args: &Vec<String>, _config: &Config, _global: &Global) -> shrust::Shell<()> {
+pub fn create_shell(args: &Vec<String>, config: &Config, global: &Global) -> shrust::Shell<()> {
+  // TODO avoid unsafe - ideally by making Shell use some <'a> lifetime bound
+  let args: &'static Vec<String> = unsafe {
+    std::mem::transmute::<&Vec<String>, &'static Vec<String>>(args)
+  };
+  let config: &'static Config = unsafe {
+    std::mem::transmute::<&Config, &'static Config>(config)
+  };
+  let global: &'static Global = unsafe {
+    std::mem::transmute::<&Global, &'static Global>(global)
+  };
+
   let mut shell = Shell::new(());
 
-  shell.new_command("status", "Get the status of network comms and local settings", 0, |io, _shell_data, cmd_args| {
+  shell.new_command("status", "Get the status of network comms and local settings", 0, move |io, _shell_data, cmd_args| {
       writeln!(io, "cmd_args={:?}", &cmd_args)?;
+      writeln!(io, "args={:?}", &args)?;
+      writeln!(io, "config={:#?}", &config)?;
+      writeln!(io, "global={:#?}", &global)?;
+      Ok(())
+  });
+
+  shell.new_command("setup-upnp", "Detect the UPNP gateway and ask it to forward ports", 0, move |io, _shell_data, cmd_args| {
+      net::attempt_upnp_setup(args, config, global);
       Ok(())
   });
 
