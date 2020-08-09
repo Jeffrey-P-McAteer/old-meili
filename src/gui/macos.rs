@@ -76,7 +76,7 @@ pub struct Window {
 
 impl Window {
     pub fn new(event_tx: Sender<SystrayEvent>) -> Result<Window, Error> {
-        let mut w = Window {
+        let w = Window {
             name: "A".to_string(),
             menu: unsafe { NSMenu::new(nil).autorelease() },
             pool: unsafe { NSAutoreleasePool::new(nil) },
